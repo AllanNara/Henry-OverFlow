@@ -60,15 +60,21 @@ const addPost = async (req, res, next) => {
     }
 }
 
-const updatePost = (req, res, next) => {
+const updatePost = async (req, res, next) => {
     const id = req.params.id;
     const {title, message, rating, tag} = req.body;
-    return Post.update(
-        {title, message, rating, tag},{
+    const postUpdated = Post.update(
+        {title, message, rating},{
             where: {id},  raw : true 
         },
-    ).then(updatedPost => res.send(updatedPost))
-    .catch(error => next(error))
+    )
+    const tags = await Tag.findAll({
+        where: {
+            name : tag
+        }
+    })
+    postUpdated.addTag(tags);
+    res.send(postUpdated)
 }
 
 const deletePost = (req, res, next) => {
